@@ -27,9 +27,9 @@
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import json
+import yaml
 
 from os.path import expanduser, isfile, abspath
-from ruamel.yaml import YAML
 from typing import Optional
 from threading import Event
 from mycroft_bus_client import MessageBusClient, Message
@@ -98,7 +98,7 @@ def send_message_file(file_path: str, bus: MessageBusClient,
             serial = json.load(f)
         except json.JSONDecodeError:
             f.seek(0)
-            serial = YAML().load(f)
+            serial = yaml.safe_load(f)
     if not serial or not isinstance(serial, dict):
         raise ValueError(f"Invalid message specified in {file_path}")
 
@@ -113,3 +113,11 @@ def send_message_file(file_path: str, bus: MessageBusClient,
         return bus.wait_for_response(message, response, 10)
     else:
         bus.emit(message)
+
+
+def send_message_simple(msg_type: str, bus: MessageBusClient):
+    """
+    Send a message with no data or context. This can be useful for mocking
+    ready messages or audio status changes.
+    """
+    bus.emit(Message(msg_type))

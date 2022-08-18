@@ -26,8 +26,40 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-BASE_CONTEXT = {
-    "client_name": "mana",
-    "client": "mana",
-    "source": ["mana"],
-}
+from mycroft_bus_client import Message, MessageBusClient
+
+
+def get_skills_list(bus: MessageBusClient) -> dict:
+    """
+    Get a list of skills from the SkillManager
+    :param bus: Connected MessageBusClient to query
+    :returns: dict of loaded skills
+    """
+    resp = bus.wait_for_response(
+            Message("skillmanager.list",
+                    context={"source": ["mana"],
+                             "destination": ["skills"]}), "mycroft.skills.list")
+    skills = resp.data if resp else None
+    return skills
+
+
+def deactivate_skill(bus: MessageBusClient, skill: str):
+    """
+    Request deactivation of a skill
+    :param bus: Connected MessageBusClient to query
+    :param skill: skill ID to deactivate
+    """
+    bus.emit(Message("intent.service.skills.deactivate", {'skill_id': skill},
+                     context={"source": ["mana"],
+                              "destination": ["skills"]}))
+
+
+def activate_skill(bus: MessageBusClient, skill: str):
+    """
+    Request activation of a skill
+    :param bus: Connected MessageBusClient to query
+    :param skill: skill ID to activate
+    """
+    bus.emit(Message("intent.service.skills.activate", {'skill_id': skill},
+                     context={"source": ["mana"],
+                              "destination": ["skills"]}))

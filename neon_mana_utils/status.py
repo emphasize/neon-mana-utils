@@ -26,8 +26,38 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-BASE_CONTEXT = {
-    "client_name": "mana",
-    "client": "mana",
-    "source": ["mana"],
-}
+from mycroft_bus_client import Message, MessageBusClient
+
+
+def check_ready(bus: MessageBusClient,
+                service: str, namespace: str = "mycroft") -> bool:
+    """
+    Check if a service is reporting ready
+    :param bus: Connected MessageBusClient to query
+    :param service: Registered service name to query (i.e. skills, audio)
+    :param namespace: Namespace service is registered in
+    :returns: Service ready state
+    """
+    resp = bus.wait_for_response(Message(f"{namespace}.{service}.is_ready",
+                                         context={"source": ["mana"],
+                                                  "destination": [service]}))
+    if resp:
+        return resp.data.get("status")
+    return False
+
+
+def check_alive(bus: MessageBusClient,
+                service: str, namespace: str = "mycroft") -> bool:
+    """
+    Check if a service is reporting ready
+    :param bus: Connected MessageBusClient to query
+    :param service: Registered service name to query (i.e. skills, audio)
+    :param namespace: Namespace service is registered in
+    :returns: Service ready state
+    """
+    resp = bus.wait_for_response(Message(f"{namespace}.{service}.is_alive",
+                                         context={"source": ["mana"],
+                                                  "destination": [service]}))
+    if resp:
+        return resp.data.get("status")
+    return False
