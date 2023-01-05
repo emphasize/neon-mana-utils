@@ -63,3 +63,39 @@ def activate_skill(bus: MessageBusClient, skill: str):
     bus.emit(Message("intent.service.skills.activate", {'skill_id': skill},
                      context={"source": ["mana"],
                               "destination": ["skills"]}))
+
+
+def get_active_skills(bus: MessageBusClient) -> dict:
+    """
+    Get a list of skills from the intent service
+    """
+    msg = Message("intent.service.active_skills.get",
+                  context={"destination": ["intent_service"],
+                           "source": ["mana"]})
+    resp = bus.wait_for_response(msg, 'intent.service.active_skills.reply')
+    data = resp.data["skills"] if resp else dict()
+    return data
+
+
+def get_adapt_manifest(bus: MessageBusClient) -> dict:
+    """
+    Get a dict of all Adapt intents
+    """
+    msg = Message("intent.service.adapt.manifest.get",
+                  context={"destination": ["intent_service"],
+                           "source": ["mana"]})
+    resp = bus.wait_for_response(msg, 'intent.service.adapt.manifest')
+    data = resp.data["intents"] if resp else dict()
+    return data
+
+
+def get_padatious_manifest(bus: MessageBusClient) -> dict:
+    """
+    Get a dict of all Padatious intents
+    """
+    msg = Message("intent.service.padatious.manifest.get",
+                  context={"destination": ["intent_service"],
+                           "source": ["mana"]})
+    resp = bus.wait_for_response(msg, 'intent.service.padatious.manifest')
+    data = resp.data["intents"] if resp is not None else dict()
+    return data
